@@ -1,0 +1,137 @@
+## Instructions
+
+### Setup:
+1. install lodash `npm install lodash`
+2. install isomorphic-dompurify `npm i isomorphic-dompurify`
+3. clone into src/services 
+```
+cd src/services
+git submodule add git@bitbucket.org:joylab/tarjim_clients.git 
+```
+4. copy config.js.sample to config.js and config.php.sample to config.php and update with values for your project
+5. delete src/services/LocalizationService if it exists
+6. add symlink in root project dir for update_locale.php run 
+```
+ln  -s src/services/tarjim_clients/react/update_locale.php
+```
+7. update import statements for LocalizationService
+```
+find ./src -type f -exec sed -i 's/services\/LocalizationService/services\/tarjim_clients\/react/g' {} \;
+```
+8. add to setup_environment script 
+```
+git submodule update --init --recursive src/services/tarjim_clients
+git submodule update --remote --merge src/services/tarjim_clients
+php update_locale.php
+```
+
+9. edit config.js.sample and config.php.sample with your values and rename to config.js and config.php
+10. run update_locale.php `php update_locale.php`
+11. in App.js: 	
+	* import { LocalizationProvider } from 'services/tarjim_clients/react';
+	* add <LocalizationService> as parent tag
+12. add to the url params for all api calls skip_get_translations=1
+
+### Usage:
+```
+import React, { useContext } from 'react';
+import { LocalizationContext } from 'services/tarjim_clients/react';
+```
+* Transalte: 
+```		
+const { __T } = useContext(LocalizationContext);
+```
+* Change lang:
+```
+const { setTranslation } = useContext(LocalizationContext);
+setTranslation(language);
+```
+* Get current lang: 
+```
+const { getCurrentLocale } = useContext(LocalizationContext);
+```
+* For page title pass in config isPageTitle: true;
+ex
+```
+__T('Insurance', {isPageTitle: true})
+```
+
+* For placeholder, dropdown/select options, page title, and swal pass skipAssignTid = true
+```
+__T('key', {skipAssignTid: true})
+```
+
+### To use variables in translation value
+* In tarjim.io add the variables you want as %%variable_name%%
+* In react pass the mappings in config
+```
+__T(key, {
+	mappings: {
+		'var1': 'var1 value',
+	}
+)
+
+```
+* If the mapping array contains nested arrays ex:
+```
+'mappings': {
+	'subkey1': {
+		'var1': 'var1 value',
+	},
+	'subkey2': {
+		'var1': 'var1 value',
+	},
+}
+```
+
+	pass subkey in react in config ex:
+```
+__T(key, {mappings: mappings, subkey: 'subkey1'})
+```
+
+* Important note
+you might need to camelize the subkey before using it in __T()
+
+### Using tarjim for media
+* call __TM(key, attributes={}) function with spread operator (...)
+* __TI() is an alias of __TM()
+* usage ex:
+```
+// optional attributes
+attributes = {
+	class: 'img-class-name',
+	width: '100px'
+}
+<img {...__TM(key, attributes)} />
+
+renders <img src='src' className='img-class-name' width='100px' />
+```
+* **Important note for media attributes**: 
+attributes received from tarjim.io will overwrite attributes received from the function call if same attribute exists in both
+so in previous example if this key has attributes: {class: 'class-from-tarjim', height:'200px'} __TM will return 
+<img src='src' class='class-from-tarjim' width='100px' height='200px'/> 
+notice that width and height are both added
+
+### Using tarjim for datasets
+* __TD($key, $config = {});
+* returns values for all languages for a key ex: 
+```
+{
+	'en' => 'en values,
+	'fr' => 'fr value'
+}
+```
+* config can be {'namespace' => $namespace} if $namespace == 'all_namespaces' returns the values for all namespaces ex:
+```
+{
+	'namespace 1' => {
+		'en' => 'en values,
+		'fr' => 'fr value'
+	{,
+	'namespace 2' => {
+		'en' => 'en value',
+		'fr' => 'fr value'
+	}
+}
+```
+
