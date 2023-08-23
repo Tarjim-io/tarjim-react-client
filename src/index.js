@@ -95,13 +95,6 @@ class TarjimClient {
 	/**
 	 *
 	 */
-	isTranslationsLoading() {
-		return this.isTranslationsLoading;
-	}
-
-	/**
-	 *
-	 */
 	setIsTranslationsLoading(value) {
 		this.isTranslationsLoading = value;
 	}
