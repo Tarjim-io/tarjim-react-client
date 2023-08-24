@@ -51,7 +51,10 @@ N.B. when tarjim finishes loading the translations it triggers the event 'tarjim
   
 
 ### Functions:
-
+* Check loading state
+```javascript
+isLoading = tarjimClient.isTranslationsLoading()
+```
 * Transalte:
 
 ```javascript
