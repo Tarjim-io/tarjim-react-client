@@ -1,5 +1,6 @@
 import DOMPurify from 'isomorphic-dompurify';
 import React from 'react';
+import memoize from 'lodash.memoize';
 
 let tarjimReactClientInstance
 class TarjimClient {
@@ -245,7 +246,7 @@ class TarjimClient {
 	/**
 	 *
 	 */
-	__T(key, config) {
+	__T = memoize((key, config) => {
 		// Sanity
 		if (this.isEmpty(key)) {
 			return;
@@ -318,12 +319,12 @@ class TarjimClient {
 		else {
 			return value;
 		}
-	}
+	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 	/**
 	 * return dataset with all languages for key
 	 */
-	__TD(key, config = {}) {
+	__TD = memoize((key, config = {}) => {
 		let namespace = this.defaultNamespace;
 		if (config && config.namespace) {
 			namespace = config.namespace;
@@ -354,7 +355,7 @@ class TarjimClient {
 		}
 
 		return dataset;
-	}
+	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 	/**
 	 * Shorthand for __T(key, {skipTid: true})
@@ -381,7 +382,7 @@ class TarjimClient {
 	 * attributes for media eg: class, id, width...
 	 * If received key doesn't have type:image return __T(key) instead
 	 */
-	__TM(key, attributes={}) {
+	__TM = memoize((key, attributes={}) => {
 		// Sanity
 		if (this.isEmpty(key)) {
 			return;
@@ -444,10 +445,10 @@ class TarjimClient {
 		}
 
 		return response;
-	}
+	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 
-	__TSEO(key, config = {}) {
+	__TSEO = memoize((key, config = {}) => {
 		// Sanity
 		if (this.isEmpty(key)) {
 			return;
@@ -469,7 +470,7 @@ class TarjimClient {
 				return key;
 		}
 
-	}
+	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 	/**
 	 * Used for meta tags (Open Graph and twitter card )
@@ -556,7 +557,7 @@ class TarjimClient {
 	 * assignTarjimId => boolean
 	 * fullValue => full object for from $_T to retreive extra attributes if needed
 	 */
-	getTranslationValue(key, namespace, language = '') {
+	getTranslationValue = memoize((key, namespace, language = '') => {
 		if (this.isEmpty(this.translations)) {
 			this.loadInitialTranslations();
 		}
@@ -605,12 +606,12 @@ class TarjimClient {
 
 
 		return result;
-	}
+	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 	/**
 	 *
 	 */
-	_injectValuesInTranslation(translationString, mappings) {
+	_injectValuesInTranslation = memoize((translationString, mappings) => {
 		let regex = /%%.*?%%/g;
 		let valuesKeysArray = translationString.match(regex);
 
@@ -628,7 +629,7 @@ class TarjimClient {
 		}
 
 		return translationString;
-	}
+	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 	/**
 	 *
