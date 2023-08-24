@@ -1,6 +1,6 @@
 <a href="https://tarjim.io"><img src="https://tarjim.io/wp-content/uploads/2022/02/final-logo-01.svg" width="450px" alt="Tarjim logo"></a>
 
-## [TARJIM DOCS](https://app.tarjim.io/en/documentation)
+## [Tarjim Docs](https://app.tarjim.io/en/documentation)
 
 
 ## Installation
@@ -32,7 +32,7 @@ const tarjimConfig = {
 }
 ```
 
-N.B. cachedTarjimData can be obtained from "https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces" with your project id and namespaces (check Tarjim docs) and use the full result;
+N.B. cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces`with your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and use the full result;
 If cachedTarjimData is not passed with config object the client will always load the latest translations from the api
 
 
