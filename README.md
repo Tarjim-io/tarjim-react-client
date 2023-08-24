@@ -1,5 +1,4 @@
-[![Tarjim Logo](https://tarjim.io/wp-content/uploads/2022/02/final-logo-01.svg "a title")](https://tarjim.io/)
-
+<a href="https://tarjim.io"><img src="https://tarjim.io/wp-content/uploads/2022/02/final-logo-01.svg" width="450px" alt="Tarjim logo"></a>
 
 ## [TARJIM DOCS](https://app.tarjim.io/en/documentation)
 
@@ -41,18 +40,12 @@ N.B. cachedTarjimData can be obtained "https://app.tarjim.io/api/v1/translationk
 
 2. Create Object and call init() function
 
-```
+```javascript
 
 import TarjimClient from 'tarjim-react-client';
 
-  
-
-let TarjimClient = new TarjimClient();
-
-TarjimClient.init(tarjimConfig);
-
-  
-
+let tarjimClient = new TarjimClient();
+tarjimClient.init(tarjimConfig);
 ```
 
 N.B. when tarjim finishes loading the translations it triggers the event 'tarjimFinishedLoadingTranslations' on the window object
@@ -63,108 +56,61 @@ N.B. when tarjim finishes loading the translations it triggers the event 'tarjim
 
 * Transalte:
 
-```
-
-const { __T } = useContext(LocalizationContext);
-
+```javascript
+tarjimClient.__T('key');
+// returns <span data-tid="id-in-tarjim">key value</span>
 ```
 
 * Change lang:
 
-```
-
-const { setTranslation } = useContext(LocalizationContext);
-
-setTranslation(language);
-
+```javascript
+tarjimClient.setCurrentLocale(language);
 ```
 
 * Get current lang:
 
+```javascript
+tarjimClient.getCurrentLocale();
 ```
 
-const { getCurrentLocale } = useContext(LocalizationContext);
+* For placeholder, dropdown/select options, page title, etc... use __TS() to skip adding a span
 
+```javascript
+__TS('key')
+// returns the value from tarjim
 ```
-
-* For page title pass in config isPageTitle: true;
-
-ex
-
-```
-
-__T('Insurance', {isPageTitle: true})
-
-```
-
-  
-
-* For placeholder, dropdown/select options, page title, and swal pass skipAssignTid = true
-
-```
-
-__T('key', {skipAssignTid: true})
-
-```
-
-  
-
 ### To use variables in translation value
 
 * In tarjim.io add the variables you want as %%variable_name%%
 
 * In react pass the mappings in config
 
-```
+```javascript
 
-__T(key, {
-
+tarjimClient.__T(key, {
 mappings: {
-
-'var1': 'var1 value',
-
-}
-
-)
-
-  
-
+		'var1': 'var1 value',
+	}
+) 
 ```
 
 * If the mapping array contains nested arrays ex:
 
-```
-
+```javascript
 'mappings': {
-
-'subkey1': {
-
-'var1': 'var1 value',
-
-},
-
-'subkey2': {
-
-'var1': 'var1 value',
-
-},
-
+	'subkey1': {
+		'var1': 'var1 value',
+	},
+	'subkey2': {
+		'var1': 'var1 value',
+	},
 }
-
 ```
-
-  
 
 pass subkey in react in config ex:
-
+```javascript
+tarjimClient.__T(key, {mappings: mappings, subkey: 'subkey1'})
 ```
-
-__T(key, {mappings: mappings, subkey: 'subkey1'})
-
-```
-
-  
-
 * Important note
 
 you might need to camelize the subkey before using it in __T()
@@ -179,21 +125,14 @@ you might need to camelize the subkey before using it in __T()
 
 * usage ex:
 
-```
-
+```javascript
 // optional attributes
-
 attributes = {
-
-class: 'img-class-name',
-
-width: '100px'
-
-}
+	class: 'img-class-name',
+	width: '100px'
+};
 
 <img {...__TM(key, attributes)} />
-
-  
 
 renders <img src='src' className='img-class-name' width='100px' />
 
@@ -204,9 +143,9 @@ renders <img src='src' className='img-class-name' width='100px' />
 attributes received from tarjim.io will overwrite attributes received from the function call if same attribute exists in both
 
 so in previous example if this key has attributes: {class: 'class-from-tarjim', height:'200px'} __TM will return
-
+```
 <img  src='src'  class='class-from-tarjim'  width='100px'  height='200px'/>
-
+```
 notice that width and height are both added
 
   
@@ -217,7 +156,7 @@ notice that width and height are both added
 
 * returns values for all languages for a key ex:
 
-```
+```javascript
 {
 	'en' => 'en values,
 	'fr' => 'fr value'
