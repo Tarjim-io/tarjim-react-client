@@ -32,7 +32,7 @@ const tarjimConfig = {
 }
 ```
 
-N.B. the initial cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces` using your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and extract ["result"]["data"] from the fetched response into your cache file;
+N.B. the initial cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces` using your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and extracting ["result"]["data"] from the fetched response into your cache file.
 If cachedTarjimData is not passed with config object the client will always load the latest translations from the api
 
 
@@ -46,13 +46,13 @@ let tarjimClient = new TarjimClient();
 tarjimClient.init(tarjimConfig);
 ```
 
-N.B. when tarjim finishes loading the translations it triggers the event 'tarjimFinishedLoadingTranslations' on the tarjimClient object
+N.B. when tarjim finishes loading the translations it triggers the event 'finishedLoadingTranslations' on the tarjimClient object
 
 
 ### Functions:
 * Check loading state
 ```javascript
-isLoading = tarjimClient.isTranslationsLoading
+isLoading = tarjimClient.isLoadingTranslations;
 ```
 * Transalte:
 
@@ -219,7 +219,7 @@ export const LocalizationProvider = ({children}) => {
 		}
 		tarjimClient.setCurrentLocale(language);
 
-		tarjimClient.on('tarjimFinishedLoadingTranslations', function() {
+		tarjimClient.on('finishedLoadingTranslations', function() {
 			setIsLoading(false);
 		})
 	  
@@ -229,7 +229,7 @@ export const LocalizationProvider = ({children}) => {
 	 *
 	 */
 	function tarjimIsLoading() {
-		return tarjimClient.isTranslationsLoading;
+		return tarjimClient.getIsLoadingTranslations();
 	} 
 
 	/**
