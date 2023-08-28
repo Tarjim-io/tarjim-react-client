@@ -4,7 +4,20 @@ import memoize from 'lodash.memoize';
 import { EventEmitter } from 'events';
 
 let tarjimReactClientInstance
-class TarjimClient extends EventEmitter{
+
+export const tarjimFunctions = {
+  __T: () => {},
+  __TS: () => {},
+  __TM: () => {},
+  __TSEO: () => {},
+  __TI: () => {},
+  __TD: () => {},
+  getCurrentLocale: () => {},
+	setCurrentLocale: () => {},
+	getIsLoadingTranslations: () => {},
+}
+
+export class TarjimClient extends EventEmitter {
 	
 	/**
 	 *
@@ -30,8 +43,8 @@ class TarjimClient extends EventEmitter{
 	/**
 	 *
 	 */
-	init(config) {
-		this.setIsTranslationsLoading(true);
+	init = (config) => {
+		this.setIsLoadingTranslations(true);
 		// Project config
 		this.projectId = config.projectId;
 		this.tarjimApikey = config.tarjimApikey;
@@ -74,34 +87,31 @@ class TarjimClient extends EventEmitter{
 	 *
 	 */
 	async initTranslations() {
-		let tarjimFinishedLoadingTranslations = new CustomEvent('tarjimFinishedLoadingTranslations');
 		if (this.cachedTarjimData.hasOwnProperty('meta') && this.cachedTarjimData.meta.hasOwnProperty('results_last_update')) {
 			this.localeLastUpdated = this.cachedTarjimData.meta.results_last_update;
 		}
-
-//		if (this.cachedTarjimData.hasOwnProperty('results')) {
-//			this.setTranslations(this.cachedTarjimData.results);
-//		}
-
-		//	USEEFFECT
-	//	this.loadInitialTranslations();
 
 		this.setCurrentLocale(this.defaultLanguage);
 
 		// Update translations 
 		await this.updateTranslations();
 
-		this.setIsTranslationsLoading(false);
-//		this.dispatchEvent(tarjimFinishedLoadingTranslations);
-		//const eventEmitter = new EventEmitter();
-		this.emit('tarjimFinishedLoadingTranslations');
+		this.setIsLoadingTranslations(false);
+		this.emit('finishedLoadingTranslations');
 	}
 
 	/**
 	 *
 	 */
-	setIsTranslationsLoading(value) {
-		this.isTranslationsLoading = value;
+	setIsLoadingTranslations(value) {
+		this.isLoadingTranslations = value;
+	}
+
+	/**
+	 *
+	 */
+	getIsLoadingTranslations() {
+		return this.isLoadingTranslations;
 	}
 
 	/**
@@ -181,47 +191,6 @@ class TarjimClient extends EventEmitter{
 			localStorage.setItem(this.localStorageKey, JSON.stringify(apiData));
 			this.setTranslations(apiData.results);
 		}
-
-		//let _translations = await this.getLocalStorageTranslations();
-
-		//this.setTranslations(_translations);
-	}
-
-	/**
-	 *
-	 */
-	async getLocalStorageTranslations() {
-		let _translations = {}
-		let localStorageData = localStorage.getItem(this.localStorageKey);
-		if (!this.isEmpty(localStorageData)) {
-			localStorageData = JSON.parse(localStorageData);
-			this.localeLastUpdated = localStorageData.meta.results_last_update;
-			if (await this.translationsNeedUpdate()) {
-				let apiData = await this.getTranslationsFromApi();
-				localStorage.setItem(this.localStorageKey, JSON.stringify(apiData));
-				_translations = apiData.results;
-			}
-		}
-		else {
-			if (await this.translationsNeedUpdate()) {
-				let apiData = await this.getTranslationsFromApi();
-				localStorage.setItem(this.localStorageKey, JSON.stringify(apiData));
-				_translations = apiData.results;
-			}
-			else {
-				if (this.cachedTarjimData.hasOwnProperty('results')) {
-					localStorage.setItem(this.localStorageKey, JSON.stringify(this.cachedTarjimData));
-					_translations = this.cachedTarjimData.results;
-				}
-				else {
-					let apiData = await this.getTranslationsFromApi();
-					localStorage.setItem(this.localStorageKey, JSON.stringify(apiData));
-					_translations = apiData.results;
-				}
-			}
-		}
-
-		return _translations;
 	}
 
 	/**
@@ -235,14 +204,14 @@ class TarjimClient extends EventEmitter{
 	/**
 	 *
 	 */
-	getCurrentLocale() {
+	getCurrentLocale = () => {
 		return this.currentLocale;
 	}
 
 	/**
 	 *
 	 */
-	setCurrentLocale(locale) {
+	setCurrentLocale = (locale) => {
 		this.currentLocale = locale;
 	}
 
@@ -276,11 +245,6 @@ class TarjimClient extends EventEmitter{
 		let assignTarjimId = translationValue.assignTarjimId;
 		let translation = translationValue.fullValue;
 
-		// If type is image call __TM() instead
-		//		if (translation.type && translation.type === 'image') {
-		//			return __TM(key, config);
-		//		}
-
 		let renderAsHtml = false;
 		let sanitized;
 		if ('ReactNative' != navigator.product) {
@@ -291,7 +255,6 @@ class TarjimClient extends EventEmitter{
 			}
 		}
 
-		//if ((typeof key === 'object' || Array.isArray(key)) && value) {
 		if (config && !this.isEmpty(config.mappings) && value) {
 			let mappings = config.mappings;
 			if (config.subkey) {
@@ -314,10 +277,6 @@ class TarjimClient extends EventEmitter{
 		}
 
 		if (assignTarjimId || renderAsHtml) {
-			//let span = document.createElement('span');
-			//span.setAttribute('data-tid', translationId);
-			//span.innerHTML = value;
-			//return span.outerHTML;
 			return <span data-tid={translationId} dangerouslySetInnerHTML={{__html: value}}></span>
 		}
 		else {
@@ -366,7 +325,7 @@ class TarjimClient extends EventEmitter{
 	 * skip assiging tid and wrapping in span
 	 * used for images, placeholder, select options, title...
 	 */
-	__TS(key, config = {}) {
+	__TS = (key, config = {}) => {
 		config = {
 			...config,
 			skipTid: true,
@@ -377,7 +336,7 @@ class TarjimClient extends EventEmitter{
 	/**
 	 * Alias for __TM()
 	 */
-	__TI(key, attributes) {
+	__TI = (key, attributes) => {
 		return this.__TM(key, attributes);
 	}
 
@@ -414,8 +373,8 @@ class TarjimClient extends EventEmitter{
 		// Merge attributes from tarjim.io and those received from view
 		// for attributes that exist in both arrays take the value from tarjim.io
 		attributes = {
-			...attributes,
-			...attributesFromRemote
+			...attributesFromRemote,
+			...attributes
 		}
 
 		let sanitized;
@@ -452,6 +411,9 @@ class TarjimClient extends EventEmitter{
 	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
 
 
+	/**
+	 *
+	 */
 	__TSEO = memoize((key, config = {}) => {
 		// Sanity
 		if (this.isEmpty(key)) {
@@ -479,7 +441,7 @@ class TarjimClient extends EventEmitter{
 	/**
 	 * Used for meta tags (Open Graph and twitter card )
 	 */
-	__TMT(key) {
+	__TMT = (key) => {
 		// Sanity
 		if (this.isEmpty(key)) {
 			return;
@@ -515,7 +477,7 @@ class TarjimClient extends EventEmitter{
 	/**
 	 * Used for Title tag
 	 */
-	__TTT(key) {
+	__TTT = (key) => {
 		// Sanity
 		if (this.isEmpty(key)) {
 			return;
@@ -535,7 +497,7 @@ class TarjimClient extends EventEmitter{
 	/**
 	 * Used for page meta description
 	 */
-	__TMD(key) {
+	__TMD = (key) => {
 		// Sanity
 		if (this.isEmpty(key)) {
 			return;
@@ -561,7 +523,7 @@ class TarjimClient extends EventEmitter{
 	 * assignTarjimId => boolean
 	 * fullValue => full object for from $_T to retreive extra attributes if needed
 	 */
-	getTranslationValue = memoize((key, namespace, language = '') => {
+	getTranslationValue(key, namespace, language = '') {
 		if (this.isEmpty(this.translations)) {
 			this.loadInitialTranslations();
 		}
@@ -610,7 +572,7 @@ class TarjimClient extends EventEmitter{
 
 
 		return result;
-	}, (key, config) =>(config ? key + JSON.stringify(config) + this.projectId + this.currentLocale : key + this.projectId + this.currentLocale))
+	}
 
 	/**
 	 *
@@ -729,5 +691,3 @@ class TarjimClient extends EventEmitter{
 		return false;
 	}
 }
-
-export default TarjimClient;
