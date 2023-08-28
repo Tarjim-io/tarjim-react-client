@@ -18,7 +18,7 @@ npm install tarjim-react-client
 1. Create config object
 
 ```javascript
-import cachedTarjimData from 'cache/cachedTarjimData';
+import cachedTarjimData from 'path-to-cached-tarjim-json-file';
 
 const tarjimConfig = {
 	projectId: 'tarjim-project-id',
@@ -26,17 +26,17 @@ const tarjimConfig = {
 	defaultLanguage: 'default-language',
 	defaultNamespace:'default-namepsace',
 	supportedLanguages: ['project-languages'],
-	additionalNamespaces: [], // optional if more than one namespace used
+	additionalNamespaces: [], // optional if more than one namespace used pass namespaces names
 	cachedTarjimData: cachedTarjimData, // JSON object containing the results from tarjim
 	useSingleInstance: true, // optional set to false if using multiple projects in same codebase and need multiple instances of the client
 }
 ```
 
-N.B. cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces`with your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and use the full result;
+N.B. the initial cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces` using your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and extract ["result"]["data"] from the fetched response into your cache file;
 If cachedTarjimData is not passed with config object the client will always load the latest translations from the api
 
 
-2. Create Object and call init() function
+2. Pass the config object to the init() function
 
 ```javascript
 
@@ -46,9 +46,8 @@ let tarjimClient = new TarjimClient();
 tarjimClient.init(tarjimConfig);
 ```
 
-N.B. when tarjim finishes loading the translations it triggers the event 'tarjimFinishedLoadingTranslations' on the window object
+N.B. when tarjim finishes loading the translations it triggers the event 'tarjimFinishedLoadingTranslations' on the tarjimClient object
 
-  
 
 ### Functions:
 * Check loading state
@@ -208,10 +207,6 @@ export const LocalizationProvider = ({children}) => {
 	const [ locale, setLocale ] = useState('');
 	const [ isLoading, setIsLoading ] = useState(true);
 
-	window.addEventListener('tarjimFinishedLoadingTranslations', function() {
-		setIsLoading(false);
-	})
-	  
 	/**
 	 *
 	 */
@@ -223,6 +218,11 @@ export const LocalizationProvider = ({children}) => {
 		language = languageElement.getAttribute('data-language')
 		}
 		tarjimClient.setCurrentLocale(language);
+
+		tarjimClient.on('tarjimFinishedLoadingTranslations', function() {
+			setIsLoading(false);
+		})
+	  
 	}, [])
 
 	/**

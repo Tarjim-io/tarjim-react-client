@@ -1,14 +1,16 @@
 import DOMPurify from 'isomorphic-dompurify';
 import React from 'react';
 import memoize from 'lodash.memoize';
+import { EventEmitter } from 'events';
 
 let tarjimReactClientInstance
-class TarjimClient {
+class TarjimClient extends EventEmitter{
 	
 	/**
 	 *
 	 */
 	constructor(config) {
+		super();
 		let useSingleInstance = config.hasOwnProperty('useSingleInstance') ? config.useSingleInstance : true;
 
 		if (useSingleInstance) {
@@ -90,7 +92,9 @@ class TarjimClient {
 		await this.updateTranslations();
 
 		this.setIsTranslationsLoading(false);
-		window.dispatchEvent(tarjimFinishedLoadingTranslations);
+//		this.dispatchEvent(tarjimFinishedLoadingTranslations);
+		//const eventEmitter = new EventEmitter();
+		this.emit('tarjimFinishedLoadingTranslations');
 	}
 
 	/**
