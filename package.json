@@ -1,5 +1,5 @@
 {
-  "name": "tarjim-react-client",
+  "name": "@tarjim/react",
   "version": "1.0.11",
   "description": "React client to use tarjim translation functions",
   "main": "dist/index.js",
