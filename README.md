@@ -186,156 +186,71 @@ notice that width and height are both added
 ```javascript
 // Libraries
 import React ,{ useState, useEffect, createContext } from 'react';
-import TarjimClient from 'tarjim-react-client';
+import { TarjimClient, tarjimFunctions } from 'tarjim-react-client';
 import tarjimConfig from 'tarjimConfig.js';
 
 export const LocalizationContext = createContext({
-	__T: () => {},
-	__TS: () => {},
-	__TM: () => {},
-	__TSEO: () => {},
-	__TI: () => {},
-	__TD: () => {},
-	getCurrentLocale: () => {},
-	setCurrentLocale: () => {},
-	tarjimIsLoading: () => {},
+  ...tarjimFunctions,
+  setCurrentLanguage: () => {},
+  tarjimIsLoading: true,
 });
 
 export const LocalizationProvider = ({children}) => {
-	// State
-	const [ tarjimClient, setTarjimClient ] = useState(new TarjimClient(tarjimConfig));
-	const [ locale, setLocale ] = useState('');
-	const [ isLoading, setIsLoading ] = useState(true);
+  // State
+  const [ tarjimClient, setTarjimClient ]  = useState(new TarjimClient(tarjimConfig));
+  const [ locale, setLocale ] = useState('');
+  const [ isLoading, setIsLoading ] = useState(true);
 
-	/**
-	 *
-	 */
-	useEffect(() => {
-		// Get language from DOM
-		let language = 'en';
-		let languageElement = document.getElementById('language');
-		if (languageElement) {
-		language = languageElement.getAttribute('data-language')
-		}
-		tarjimClient.setCurrentLocale(language);
+  let defaultLanguage = 'en';
 
-		tarjimClient.on('finishedLoadingTranslations', function() {
-			setIsLoading(false);
-		})
-	  
-	}, [])
+  /**
+   * 
+   */
+    useEffect(() => {
 
-	/**
-	 *
-	 */
-	function tarjimIsLoading() {
-		return tarjimClient.getIsLoadingTranslations();
-	} 
+    // Get language from cake
+      let language;
+      let languageElement = document.getElementById('language');
+      language = defaultLanguage;
+      if (languageElement) {
+        language = languageElement.getAttribute('data-language')
+      }
+      else {
+        language = defaultLanguage;
+      }
 
-	/**
-	 *
-	 */
-	function getCurrentLocale() {
-		return tarjimClient.getCurrentLocale();
-	}
+      tarjimClient.setCurrentLocale(language);
 
-	/**
-	 *
-	 */
-	function setCurrentLocale(_locale) {
-		let returnVal = tarjimClient.setCurrentLocale(_locale);
-		setLocale(_locale)
-		return returnVal;
-	}
+      tarjimClient.on('finishedLoadingTranslations', function() {
+        setIsLoading(false);
+      })
 
-	// Translation functions
-	/**
-	 *
-	 */
-	function __T(key, config = {}) {
-		return tarjimClient.__T(key, config);
-	}
+    // Disable eslint warning for next line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-	/**
-	 * return dataset with all languages for key
-	 */
-	function __TD(key, config = {}) {	
-		return tarjimClient.__TD(key, config);
-	}
+  /**
+   *
+   */
+  function setCurrentLanguage(_locale) {
+    let returnVal = tarjimClient.setCurrentLocale(_locale);
+    setLocale(_locale)
+    return returnVal;
+  }
 
-	/**
-	 * Shorthand for __T(key, {skipTid: true})
-	 * skip assiging tid and wrapping in span
-	 * used for images, placeholder, select options, title...
-	 */ 
-	function __TS(key, config = {}) {
-		return tarjimClient.__TS(key, config);
-	}
-
-	/**
-	 * Alias for __TM()
-	 */
-	function __TI(key, attributes) {
-		return tarjimClient.__TI(key, attributes);
-	}
-
-	/**
-	 * Used for media
-	 * attributes for media eg: class, id, width...
-	 * If received key doesn't have type:image return __T(key) instead
-	*/
-	function __TM(key, attributes={}) {
-		return tarjimClient.__TM(key, attributes);
-	}
-
-	/**
-	 *
-	 */
-	function __TSEO(key, config = {}) {
-		return tarjimClient.__TSEO(key, config);
-	} 
-
-	/**
-	 * Used for meta tags (Open Graph and twitter card )
-	 */
-	function __TMT(key) {
-		return tarjimClient.__TMT(key);
-	}
-
-	/**
-	 * Used for Title tag
-	 */
-	function __TTT(key) {
-		return tarjimClient.__TTT(key);
-	}
-
-	/**
-	 * Used for page meta description
-	 */
-	function __TMD(key) {
-		return tarjimClient.__TMD(key);
-	}
-
-	/**
-	 * Render
-	 */
-	return (
-		<LocalizationContext.Provider
-			value={{
-			__T,
-			__TS,
-			__TM,
-			__TSEO,
-			__TI,
-			__TD,
-			tarjimIsLoading: isLoading,
-			getCurrentLocale,
-			setCurrentLocale
-			}}>
-			{children}
-		</LocalizationContext.Provider>
-	);
-
+  /**
+   * Render
+   */
+  return (
+    <LocalizationContext.Provider
+      value={{
+        ...(new TarjimClient(tarjimConfig)),
+        tarjimIsLoading: isLoading,
+        setCurrentLanguage,
+      }}>
+      {children}
+    </LocalizationContext.Provider>
+  );
 }
 
 ```
