@@ -33,6 +33,7 @@ const tarjimConfig = {
 ```
 
 N.B. the initial cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces` using your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and extracting ["result"]["data"] from the fetched response into your cache file.
+
 If cachedTarjimData is not passed with config object the client will always load the latest translations from the api
 
 
@@ -47,43 +48,48 @@ tarjimClient.init(tarjimConfig);
 ```
 
 N.B. when tarjim finishes loading the translations it triggers the event 'finishedLoadingTranslations' on the tarjimClient object
+```javascript 
+TarjimClient.on('finishedLoadingTranslations', () => { // your logic }); 
+```
 
 
-### Functions:
+### Functions
+
 * Check loading state
 ```javascript
-isLoading = tarjimClient.isLoadingTranslations;
+isLoading = tarjimClient.getIsLoadingTranslations();
 ```
-* Transalte:
+* Translate:
 
 ```javascript
 tarjimClient.__T('key');
 // returns <span data-tid="id-in-tarjim">key value</span>
 ```
 
-* Change lang:
+* Change language:
 
 ```javascript
 tarjimClient.setCurrentLocale(language);
 ```
 
-* Get current lang:
+* Get current language:
 
 ```javascript
 tarjimClient.getCurrentLocale();
 ```
 
-* For placeholder, dropdown/select options, page title, etc... use __TS() to skip adding a span
+* For placeholder, dropdown options, page title, etc... use __TS() to skip adding a span and causing render issues
 
 ```javascript
 __TS('key')
 // returns the value from tarjim
 ```
-### To use variables in translation value
+### Using variables in translations
 
-* In tarjim.io add the variables you want as %%variable_name%%
 
-* In react pass the mappings in config
+* In your [app.tarjim.io](https://app.tarjim.io) project add the variables you want by using %%variable_name%% syntax as translation value
+
+* In react client, pass the variable mapping in translation config
 
 ```javascript
 
@@ -91,40 +97,12 @@ tarjimClient.__T(key, {
 mappings: {
 		'var1': 'var1 value',
 	}
-) 
+}) 
 ```
-
-* If the mapping array contains nested arrays ex:
-
-```javascript
-'mappings': {
-	'subkey1': {
-		'var1': 'var1 value',
-	},
-	'subkey2': {
-		'var1': 'var1 value',
-	},
-}
-```
-
-pass subkey in react in config ex:
-```javascript
-tarjimClient.__T(key, {mappings: mappings, subkey: 'subkey1'})
-```
-* Important note
-
-you might need to camelize the subkey before using it in __T()
-
-  
 
 ### Using tarjim for media
 
 * call __TM(key, attributes={}) function with spread operator (...)
-
-* __TI() is an alias of __TM()
-
-* usage ex:
-
 ```javascript
 // optional attributes
 attributes = {
@@ -138,23 +116,17 @@ renders <img src='src' className='img-class-name' width='100px' />
 
 ```
 
-*  **Important note for media attributes**:
-
-attributes received from tarjim.io will overwrite attributes received from the function call if same attribute exists in both
-
-so in previous example if this key has attributes: {class: 'class-from-tarjim', height:'200px'} __TM will return
-```
-<img  src='src'  class='class-from-tarjim'  width='100px'  height='200px'/>
-```
-notice that width and height are both added
-
+**NOTE** Attributes defined in tarjim.io translation value will be overwritten by the attributes passed to __TM
   
 
-### Using tarjim for datasets
+### Using tarjim datasets
+To fetch all languages for a specific key in default namespace
 
-* __TD($key, $config = {});
+```javascript
+__TD($key, $config = {});
+```
 
-* returns values for all languages for a key ex:
+Sample return
 
 ```javascript
 {
@@ -163,7 +135,9 @@ notice that width and height are both added
 }
 ```
 
-* config can be {'namespace' => $namespace} if $namespace == 'all_namespaces' returns the values for all namespaces ex:
+To fetch key translations for a specific namespace, you can pass ```{'namespace' => 'your-namespace-name'}``` in the config param or ```{'namespace' => 'allNamespaces'}``` to fetch all namespaces.
+
+Example response
 
 ```javascript
 {
@@ -178,9 +152,7 @@ notice that width and height are both added
 	}
 }
 ```
-
   
-
 ### Example Usage With Provider
 
 ```javascript
