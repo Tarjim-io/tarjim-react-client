@@ -299,7 +299,7 @@ export class TarjimClient extends EventEmitter {
 			this.allNamespaces.forEach(_namespace => {
 				dataset[_namespace] = {};
 				this.supportedLanguages.forEach(language => {
-					let value = getTranslationValue(key, _namespace, language);
+					let value = this.getTranslationValue(key, _namespace, language);
 					if (value.keyFound) {
 						value = value.value;
 					}
@@ -467,7 +467,7 @@ export class TarjimClient extends EventEmitter {
 					metaTag.setAttribute('property', property )
 					metaTag.setAttribute('content', tagsObject[property] )
 					document.head.appendChild(metaTag);
-			}
+				}
 			});
 
 		}
@@ -505,12 +505,20 @@ export class TarjimClient extends EventEmitter {
 
 		let namespace = this.defaultNamespace;
 
-		let translationValue = getTranslationValue(key, namespace);
+		let translationValue = this.getTranslationValue(key, namespace);
 		let value = translationValue.value;
 
 		let metaTag;
 
-		document.querySelector('meta[name="description"]').setAttribute("content", value);
+		if (document.querySelector('meta[name="description"]')) {
+			document.querySelector('meta[name="description"]').setAttribute("content", value);
+		}
+		else {
+			metaTag = document.createElement("meta");
+			metaTag.setAttribute('name', 'description')
+			metaTag.setAttribute('content', value)
+			document.head.appendChild(metaTag);
+		}
 
 	}
 

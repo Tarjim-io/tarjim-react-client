@@ -152,6 +152,53 @@ Example response
 	}
 }
 ```
+
+### Using tarjim for SEO tags
+* For page title
+```javascript
+__TSEO(key, {SEO: 'page_title'})
+```
+sets document.title = key's value from tarjim
+
+* For open graph
+```javascript
+__TSEO(key, {SEO: 'open_graph'})
+```
+
+creates the elements and attaches them to document head
+```
+<meta property="og:title" content="title">
+<meta property="og:description" content="desc">
+<meta property="og:site_name" content="site name">
+<meta property="og:url" content="url">
+<meta property="og:image" content="image">
+```
+the content is the value provided in tarjim for key type 'Open Graph'
+
+* For twitter cards
+```javascript
+__TSEO(key, {SEO: 'open_graph'})
+```
+
+creates the elements and attaches them to document head
+```
+<meta property="twitter:card" content="card">
+<meta property="twitter:title" content="title">
+<meta property="twitter:description" content="desc">
+<meta property="twitter:site" content="site">
+<meta property="twitter:image" content="image">
+```
+the content is the value provided in tarjim for key type 'Twitter card'
+
+* For page meta description
+```javascript
+__TSEO(key, {SEO: 'page_description'})
+```
+sets the content of the meta element where name="description" if it exists, creates it otherwise
+```
+<meta name="description" content="description en">
+```
+
   
 ### Example Usage With Provider
 
