@@ -53,7 +53,7 @@ N.B. when tarjim finishes loading the translations it triggers the event 'tarjim
 ### Functions:
 * Check loading state
 ```javascript
-isLoading = tarjimClient.isTranslationsLoading()
+isLoading = tarjimClient.isTranslationsLoading
 ```
 * Transalte:
 
@@ -229,7 +229,7 @@ export const LocalizationProvider = ({children}) => {
 	 *
 	 */
 	function tarjimIsLoading() {
-		return tarjimClient.isTranslationsLoading();
+		return tarjimClient.isTranslationsLoading;
 	} 
 
 	/**

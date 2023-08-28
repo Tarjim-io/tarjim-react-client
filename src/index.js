@@ -29,6 +29,7 @@ class TarjimClient {
 	 *
 	 */
 	init(config) {
+		this.setIsTranslationsLoading(true);
 		// Project config
 		this.projectId = config.projectId;
 		this.tarjimApikey = config.tarjimApikey;
@@ -72,7 +73,6 @@ class TarjimClient {
 	 */
 	async initTranslations() {
 		let tarjimFinishedLoadingTranslations = new CustomEvent('tarjimFinishedLoadingTranslations');
-		this.setIsTranslationsLoading(true);
 		if (this.cachedTarjimData.hasOwnProperty('meta') && this.cachedTarjimData.meta.hasOwnProperty('results_last_update')) {
 			this.localeLastUpdated = this.cachedTarjimData.meta.results_last_update;
 		}
