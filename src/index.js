@@ -154,7 +154,7 @@ export class TarjimClient extends EventEmitter {
 
 			// if local storage data is newer than cached data
 			if (localStorageLastUpdated > this.localeLastUpdated) {
-				this.localeLastUpdated = localStorageData;
+				this.localeLastUpdated = localStorageLastUpdated;
 				if (await this.translationsNeedUpdate()) {
 					let apiData = await this.getTranslationsFromApi();
 					localStorage.setItem(this.localStorageKey, JSON.stringify(apiData));
