@@ -18,6 +18,12 @@
     "localization"
   ],
   "author": "Tarjim",
+  "contributors": [
+    {
+      "name": "jprah",
+      "email": "jp.rahme1997@gmail.com"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://bitbucket.org/joylab/tarjim-react-client/issues"
