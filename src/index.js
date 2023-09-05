@@ -3,7 +3,7 @@ import React from 'react';
 import memoize from 'lodash.memoize';
 import { EventEmitter } from 'events';
 
-let tarjimReactClientInstance
+let tarjimReactClientInstance = null;
 
 export const tarjimFunctions = {
   __T: () => {},
@@ -18,67 +18,104 @@ export const tarjimFunctions = {
 }
 
 export class TarjimClient extends EventEmitter {
-	
+
 	/**
 	 *
 	 */
 	constructor(config) {
 		super();
-		let useSingleInstance = config.hasOwnProperty('useSingleInstance') ? config.useSingleInstance : true;
+    const { useSingleInstance = true } = config;
 
+    // Singleton handling
 		if (useSingleInstance) {
-			if (tarjimReactClientInstance) {
-				return tarjimReactClientInstance;
-			}
-			else {
-				this.init(config)
-				tarjimReactClientInstance = this;
-			}
+      return this.getInstance(config);
 		}
-		else {
-			this.init(config)
-		}
+
+    this.init(config)
 	}
+
+	/**
+   *
+   */
+  getInstance = (config) => {
+    // Instance already initialized
+		if (tarjimReactClientInstance === null) {
+      this.init(config)
+      tarjimReactClientInstance = this;
+		}
+
+		// Initialize instance
+    return tarjimReactClientInstance;
+  }
+
+  /**
+   *
+   */
+  readInConfig(config) {
+    const {
+      projectId,
+      tarjimApikey,
+      defaultLanguage,
+      defaultNamespace,
+      supportedLanguages,
+      additionalNamespaces = [],
+      cachedTarjimData = {}
+    } = config;
+
+		// Project config
+		this.projectId = projectId;
+		this.tarjimApikey = tarjimApikey;
+		this.defaultLanguage = defaultLanguage;
+		this.supportedLanguages = supportedLanguages;
+
+    // Namespace
+		this.defaultNamespace = defaultNamespace;
+		this.additionalNamespaces = additionalNamespaces;
+		this.allNamespaces = [ defaultNamespace, ...additionalNamespaces];
+
+		// Cache
+		this.cachedTarjimData = cachedTarjimData;
+		this.localeLastUpdated = 0;
+
+		// Local storage
+		this.localStorageKey = projectId+'-'+this.allNamespaces.toString()+'-tarjim-cached-translations';
+
+  }
+
+  /**
+   *
+   */
+  configureDOMPurify() {
+		// DOMPurify config
+		DOMPurify.setConfig({ALLOWED_ATTR: ['style', 'class', 'className', 'href', 'tabindex']})
+		DOMPurify.addHook('afterSanitizeAttributes', function (node) {
+
+			// Set value of all elements having target attr to '_blank'
+			if ('href' in node) {
+				node.setAttribute('target', '_blank');
+				node.setAttribute('rel', 'noopener noreferrer');
+			}
+		});
+  }
 
 	/**
 	 *
 	 */
 	init = (config) => {
 		this.setIsLoadingTranslations(true);
-		// Project config
-		this.projectId = config.projectId;
-		this.tarjimApikey = config.tarjimApikey;
-		this.defaultLanguage = config.defaultLanguage;
-		this.defaultNamespace = config.defaultNamespace;
-		this.supportedLanguages = config.supportedLanguages;
-		this.additionalNamespaces = !this.isEmpty(config.additionalNamespaces) ? config.additionalNamespaces : []; 
-		this.allNamespaces = this.additionalNamespaces;
-		this.allNamespaces.unshift(this.defaultNamespace);
 
-		// Cache
-		this.cachedTarjimData = !this.isEmpty(config.cachedTarjimData) ? config.cachedTarjimData : {};
-		this.localeLastUpdated = 0;
-
-		// Local storage
-		this.localStorageKey = this.projectId+'-'+this.allNamespaces.toString()+'-tarjim-cached-translations';
+    // Read-in configuration
+    this.readInConfig(config);
 
 		// Api endpoints
 		this.getMetaEndpoint = `https://app.tarjim.io/api/v1/translationkeys/json/meta/${this.projectId}?apikey=${this.tarjimApikey}`;
 		this.getTranslationsEndpoint = `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces`;
 
-		// DOMPurify config
-		DOMPurify.setConfig({ALLOWED_ATTR: ['style', 'class', 'className', 'href', 'tabindex']})
-		DOMPurify.addHook('afterSanitizeAttributes', function (node) {
-			// set all elements owning target to target=_blank
-			if ('href' in node) {
-				node.setAttribute('target', '_blank');
-				node.setAttribute('rel', 'noopener noreferrer');
-			}
-		});
+		this.configureDOMPurify();
 
+    // Load translations
 		this.loadInitialTranslations();
 
-		//this.setTranslations(this.cachedTarjimData);
 		this.initTranslations();
 
 	}
@@ -87,17 +124,19 @@ export class TarjimClient extends EventEmitter {
 	 *
 	 */
 	async initTranslations() {
-		if (this.cachedTarjimData.hasOwnProperty('meta') && this.cachedTarjimData.meta.hasOwnProperty('results_last_update')) {
-			this.localeLastUpdated = this.cachedTarjimData.meta.results_last_update;
-		}
+    if (
+      this.cachedTarjimData.hasOwnProperty('meta') &&
+      this.cachedTarjimData.meta.hasOwnProperty('results_last_update')
+    ) {
+      this.localeLastUpdated = this.cachedTarjimData.meta.results_last_update;
+    }
+    this.setCurrentLocale(this.defaultLanguage);
 
-		this.setCurrentLocale(this.defaultLanguage);
+    // Update translations
+    await this.updateTranslations();
 
-		// Update translations 
-		await this.updateTranslations();
-
-		this.setIsLoadingTranslations(false);
-		this.emit('finishedLoadingTranslations');
+    this.setIsLoadingTranslations(false);
+    this.emit('finishedLoadingTranslations');
 	}
 
 	/**
@@ -122,14 +161,18 @@ export class TarjimClient extends EventEmitter {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	loadInitialTranslations() {
 		this.setTranslations({});
 		let _translations = {}
+
+    // Read translations from cache
 		if (this.cachedTarjimData.hasOwnProperty('results')) {
-			_translations = this.cachedTarjimData.results;	
+			_translations = this.cachedTarjimData.results;
 		}
+
+    // Initialize translations as empty objects
 		else {
 			this.allNamespaces.forEach(namespace => {
 				_translations[namespace] = {};
@@ -147,12 +190,13 @@ export class TarjimClient extends EventEmitter {
 	 */
 	async updateTranslations() {
 		let localStorageData = localStorage.getItem(this.localStorageKey);
-		
+
+    // Case not empty local storage
 		if (!this.isEmpty(localStorageData)) {
 			localStorageData = JSON.parse(localStorageData);
 			let localStorageLastUpdated = localStorageData.meta.results_last_update;
 
-			// if local storage data is newer than cached data
+			// Case local storage data is newer than cached data
 			if (localStorageLastUpdated > this.localeLastUpdated) {
 				this.localeLastUpdated = localStorageLastUpdated;
 				if (await this.translationsNeedUpdate()) {
@@ -163,8 +207,8 @@ export class TarjimClient extends EventEmitter {
 				else {
 					this.setTranslations(localStorageData.results);
 				}
-			} 
-			// if cached data is newer than local storage
+			}
+			// Case cached data is newer than local storage
 			else {
 				if (await this.translationsNeedUpdate()) {
 					let apiData = await this.getTranslationsFromApi();
@@ -175,7 +219,8 @@ export class TarjimClient extends EventEmitter {
 					localStorage.setItem(this.localStorageKey, JSON.stringify(this.cachedTarjimData));
 				}
 			}
-		}
+		} // END Case not empty local storage
+    // Case not  empty cached data
 		else if (!this.isEmpty(this.cachedTarjimData)){
 			if (await this.translationsNeedUpdate()) {
 				let apiData = await this.getTranslationsFromApi();
@@ -185,7 +230,8 @@ export class TarjimClient extends EventEmitter {
 			else {
 				localStorage.setItem(this.localStorageKey, JSON.stringify(this.cachedTarjimData));
 			}
-		}
+		} // END Case not  empty cached data
+		// Read translations from API
 		else {
 			let apiData = await this.getTranslationsFromApi();
 			localStorage.setItem(this.localStorageKey, JSON.stringify(apiData));
@@ -196,7 +242,7 @@ export class TarjimClient extends EventEmitter {
 	/**
 	 *
 	 */
-	async setTranslation(languageTag, isRTL = false) {
+	setTranslation(languageTag, isRTL = false) {
 		// Set translation
 		this.setCurrentLocale(languageTag);
 	}
@@ -212,7 +258,13 @@ export class TarjimClient extends EventEmitter {
 	 *
 	 */
 	setCurrentLocale = (locale) => {
+    if (this.isEmpty(locale)) {
+      console.warn('WARNING locale cannot be empty');
+      return false;
+    }
+
 		this.currentLocale = locale;
+    return true;
 	}
 
 	// Translation functions
@@ -542,13 +594,17 @@ export class TarjimClient extends EventEmitter {
 
 		let tempKey = key;
 		let keyFound = false;
+
+    // Old behaviour compatibility
 		if (typeof key === 'object' || Array.isArray(key)) {
 			tempKey = key['key'];
 		}
 
 		let translation;
 		if (
+      typeof this.translations === 'object' &&
 			this.translations.hasOwnProperty(namespace) &&
+			this.translations[namespace].hasOwnProperty(language) &&
 			this.translations[namespace][language].hasOwnProperty(tempKey.toLowerCase())
 		) {
 			keyFound = true;
