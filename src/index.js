@@ -191,10 +191,14 @@ export class TarjimClient extends EventEmitter {
 	async updateTranslations() {
 		let localStorageData = localStorage.getItem(this.localStorageKey);
 
-    // Case not empty local storage
-		if (!this.isEmpty(localStorageData)) {
-			localStorageData = JSON.parse(localStorageData);
-			let localStorageLastUpdated = localStorageData.meta.results_last_update;
+    // Parse local storage data
+    if (this.isJsonString(localStorageData)) {
+      localStorageData = JSON.parse(localStorageData);
+    }
+
+    // Case valid tarjim object
+		if (this.isValidTarjimObject(localStorageData)) {
+      let localStorageLastUpdated = localStorageData.meta.results_last_update;
 
 			// Case local storage data is newer than cached data
 			if (localStorageLastUpdated > this.localeLastUpdated) {
@@ -713,6 +717,15 @@ export class TarjimClient extends EventEmitter {
 		return _translations;
 	}
 
+  /**
+   *
+   */
+  isValidTarjimObject(tarjimObj = {}) {
+    return tarjimObj
+      && typeof tarjimObj === 'object'
+      && tarjimObj.hasOwnProperty('meta')
+      && tarjimObj.meta.hasOwnProperty('results_last_update');
+  }
 
 	/**
 	 *
@@ -754,4 +767,16 @@ export class TarjimClient extends EventEmitter {
 
 		return false;
 	}
+
+  /**
+   *
+   */
+  isJsonString(str) {
+    try {
+      JSON.parse(str);
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
 }
