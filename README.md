@@ -29,6 +29,7 @@ const tarjimConfig = {
 	additionalNamespaces: [], // optional if more than one namespace used pass namespaces names
 	cachedTarjimData: cachedTarjimData, // JSON object containing the results from tarjim
 	useSingleInstance: true, // optional set to false if using multiple projects in same codebase and need multiple instances of the client
+    keyCase: 'lower', // optional, defaults to 'lower'. Set to specify the case of the keys when pulled from tarjim. 'lower' converts all keys to lowercase and converts keys passed to __T() functions to lowercase before lookup. 'original' keeps the keys' cases as is from tarjim and preserves the cases of keys passed to __T().
 }
 ```
 

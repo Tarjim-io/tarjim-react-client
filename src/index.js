@@ -59,7 +59,8 @@ export class TarjimClient extends EventEmitter {
       defaultNamespace,
       supportedLanguages,
       additionalNamespaces = [],
-      cachedTarjimData = {}
+      cachedTarjimData = {},
+			keyCase = 'lower',
     } = config;
 
 		// Project config
@@ -67,6 +68,7 @@ export class TarjimClient extends EventEmitter {
 		this.tarjimApikey = tarjimApikey;
 		this.defaultLanguage = defaultLanguage;
 		this.supportedLanguages = supportedLanguages;
+		this.keyCase = keyCase;
 
     // Namespace
 		this.defaultNamespace = defaultNamespace;
@@ -604,15 +606,28 @@ export class TarjimClient extends EventEmitter {
 			tempKey = key['key'];
 		}
 
+		switch(this.keyCase) {
+			case 'lower':
+				tempKey = tempKey.toLowerCase();
+				break;
+			case 'original':
+			case 'preserve':
+				tempKey = tempKey;
+				break;
+			default:
+				tempKey = tempKey.toLowerCase();
+				break;
+		}
+
 		let translation;
 		if (
       typeof this.translations === 'object' &&
 			this.translations.hasOwnProperty(namespace) &&
 			this.translations[namespace].hasOwnProperty(language) &&
-			this.translations[namespace][language].hasOwnProperty(tempKey.toLowerCase())
+			this.translations[namespace][language].hasOwnProperty(tempKey)
 		) {
 			keyFound = true;
-			translation = this.translations[namespace][language][tempKey.toLowerCase()];
+			translation = this.translations[namespace][language][tempKey];
 		}
 		else {
 			translation = tempKey;
@@ -695,12 +710,28 @@ export class TarjimClient extends EventEmitter {
 		let _translations = {};
 
 		try {
+
+			let keyCase = {};
+			switch(this.keyCase) {
+				case 'lower':
+					keyCase = {'key_case_to_lower': true};
+					break;
+				case 'original':
+				case 'preserve':
+					keyCase = {'key_case_preserve': true};
+					break;
+				default:
+					keyCase = {'key_case_to_lower': true};
+					break;
+			}
+
 			let response = await fetch(this.getTranslationsEndpoint, {
 				method: 'POST',
 				body: JSON.stringify({
 					'project_id': this.projectId,
 					'namespaces': this.allNamespaces,
 					'apikey': this.tarjimApikey,
+					'key_case': keyCase,
 				}),
 			});
 			let result = await response.json();
