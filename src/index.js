@@ -598,12 +598,14 @@ export class TarjimClient extends EventEmitter {
 			language = this.currentLocale;
 		}
 
+		let originalKey = key;
 		let tempKey = key;
 		let keyFound = false;
 
     // Old behaviour compatibility
 		if (typeof key === 'object' || Array.isArray(key)) {
 			tempKey = key['key'];
+			originalKey = key['key'];
 		}
 
 		switch(this.keyCase) {
@@ -630,7 +632,7 @@ export class TarjimClient extends EventEmitter {
 			translation = this.translations[namespace][language][tempKey];
 		}
 		else {
-			translation = tempKey;
+			translation = originalKey;
 		}
 
 		let translationString;
