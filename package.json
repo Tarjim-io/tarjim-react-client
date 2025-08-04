@@ -1,43 +1,44 @@
 {
-  "name": "tarjim-react-client",
-  "version": "1.0.21",
-  "description": "React client to use tarjim translation functions",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && NODE_ENV=production babel src/index.js --out-dir dist --copy-files"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/Tarjim-io/tarjim-react-client.git"
-  },
-  "keywords": [
-    "tarjim",
-    "translation",
-    "localization"
-  ],
-  "author": "Tarjim",
-  "contributors": [
-    {
-      "name": "jprah",
-      "email": "jp.rahme1997@gmail.com"
+    "name": "tarjim-react-client",
+    "version": "1.0.21",
+    "description": "React client to use tarjim translation functions",
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "rm -rf dist && NODE_ENV=production npx babel src --out-dir dist --copy-files"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/Tarjim-io/tarjim-react-client.git"
+    },
+    "keywords": [
+        "tarjim",
+        "translation",
+        "localization"
+    ],
+    "author": "Tarjim",
+    "contributors": [{
+        "name": "jprah",
+        "email": "jp.rahme1997@gmail.com"
+    }],
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Tarjim-io/tarjim-react-client/issues"
+    },
+    "homepage": "https://github.com/Tarjim-io/tarjim-react-client#readme",
+    "devDependencies": {
+        "@babel/cli": "^7.21.5",
+        "@babel/core": "^7.22.1",
+        "@babel/preset-env": "^7.22.4"
+    },
+    "dependencies": {
+        "@babel/polyfill": "^7.12.1",
+        "@babel/preset-react": "^7.22.3",
+        "core-js": "^3.6.5",
+        "eventemitter3": "^5.0.1",
+        "isomorphic-dompurify": "^0.15.0",
+        "lodash": "^4.17.21",
+        "lodash.memoize": "^4.1.2"
     }
-  ],
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Tarjim-io/tarjim-react-client/issues"
-  },
-  "homepage": "https://github.com/Tarjim-io/tarjim-react-client#readme",
-  "devDependencies": {
-    "@babel/cli": "^7.21.5",
-    "@babel/core": "^7.22.1",
-    "@babel/preset-env": "^7.22.4"
-  },
-  "dependencies": {
-    "@babel/polyfill": "^7.12.1",
-    "@babel/preset-react": "^7.22.3",
-    "isomorphic-dompurify": "^0.15.0",
-    "lodash": "^4.17.21"
-  }
 }

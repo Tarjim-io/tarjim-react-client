@@ -1,7 +1,10 @@
 import DOMPurify from 'isomorphic-dompurify';
 import React from 'react';
 import memoize from 'lodash.memoize';
-import { EventEmitter } from 'events';
+import EventEmitter from 'eventemitter3';
+import { version } from '../package.json';
+
+
 
 let tarjimReactClientInstance = null;
 
@@ -110,7 +113,7 @@ export class TarjimClient extends EventEmitter {
     this.readInConfig(config);
 
 		// Api endpoints
-		this.getMetaEndpoint = `https://app.tarjim.io/api/v1/translationkeys/json/meta/${this.projectId}?apikey=${this.tarjimApikey}`;
+		this.getMetaEndpoint = `https://app.tarjim.io/api/v1/translationkeys/json/meta/${this.projectId}?apikey=${this.tarjimApikey}&version=react_${version}`;
 		this.getTranslationsEndpoint = `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces`;
 
 		this.configureDOMPurify();
@@ -734,6 +737,7 @@ export class TarjimClient extends EventEmitter {
 					'namespaces': this.allNamespaces,
 					'apikey': this.tarjimApikey,
 					'key_case': keyCase,
+					 version: `react_${version}`
 				}),
 			});
 			let result = await response.json();
