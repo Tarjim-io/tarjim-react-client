@@ -17,8 +17,8 @@ export const tarjimFunctions = {
   __TI: () => {},
   __TD: () => {},
   getCurrentLocale: () => {},
-	setCurrentLocale: () => {},
-	getIsLoadingTranslations: () => {},
+  setCurrentLocale: () => {},
+  getIsLoadingTranslations: () => {},
 }
 
 export class TarjimClient extends EventEmitter {

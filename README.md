@@ -2,6 +2,7 @@
 
 ## [Tarjim Docs](https://app.tarjim.io/en/documentation)
 
+---
 
 ## Installation
 
@@ -9,205 +10,103 @@
 npm install tarjim-react-client
 ```
 
-  
+---
 
-## Usage:
+## Usage
 
-### Setting up
+### ✅ Step 1: Create `tarjimConfig`
 
-1. Create config object
+<details>
+<summary><strong>JavaScript</strong></summary>
 
-```javascript
+```js
+// tarjimConfig.js
 import cachedTarjimData from 'path-to-cached-tarjim-json-file';
 
 const tarjimConfig = {
-	projectId: 'tarjim-project-id',
-	tarjimApikey: 'tarjim-api-key',
-	defaultLanguage: 'default-language',
-	defaultNamespace:'default-namepsace',
-	supportedLanguages: ['project-languages'],
-	additionalNamespaces: [], // optional if more than one namespace used pass namespaces names
-	cachedTarjimData: cachedTarjimData, // JSON object containing the results from tarjim
-	useSingleInstance: true, // optional set to false if using multiple projects in same codebase and need multiple instances of the client
-    keyCase: 'lower', // optional, defaults to 'lower'. Set to specify the case of the keys when pulled from tarjim. 'lower' converts all keys to lowercase and converts keys passed to __T() functions to lowercase before lookup. 'original' keeps the keys' cases as is from tarjim and preserves the cases of keys passed to __T().
-}
-```
-
-N.B. the initial cachedTarjimData can be obtained from `https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces` using your project id and namespaces (check [Tarjim docs](https://app.tarjim.io/en/documentation)) and extracting ["result"]["data"] from the fetched response into your cache file.
-
-If cachedTarjimData is not passed with config object the client will always load the latest translations from the api
-
-
-2. Pass the config object to the init() function
-
-```javascript
-
-import TarjimClient from 'tarjim-react-client';
-
-let tarjimClient = new TarjimClient();
-tarjimClient.init(tarjimConfig);
-```
-
-N.B. when tarjim finishes loading the translations it triggers the event 'finishedLoadingTranslations' on the tarjimClient object
-```javascript 
-TarjimClient.on('finishedLoadingTranslations', () => { // your logic }); 
-```
-
-
-### Functions
-
-* Check loading state
-```javascript
-isLoading = tarjimClient.getIsLoadingTranslations();
-```
-* Translate:
-
-```javascript
-tarjimClient.__T('key');
-// returns <span data-tid="id-in-tarjim">key value</span>
-```
-
-* Change language:
-
-```javascript
-tarjimClient.setCurrentLocale(language);
-```
-
-* Get current language:
-
-```javascript
-tarjimClient.getCurrentLocale();
-```
-
-* For placeholder, dropdown options, page title, etc... use __TS() to skip adding a span and causing render issues
-
-```javascript
-__TS('key')
-// returns the value from tarjim
-```
-### Using variables in translations
-
-
-* In your [app.tarjim.io](https://app.tarjim.io) project add the variables you want by using %%variable_name%% syntax as translation value
-
-* In react client, pass the variable mapping in translation config
-
-```javascript
-
-tarjimClient.__T(key, {
-mappings: {
-		'var1': 'var1 value',
-	}
-}) 
-```
-
-### Using tarjim for media
-
-* call __TM(key, attributes={}) function with spread operator (...)
-```javascript
-// optional attributes
-attributes = {
-	class: 'img-class-name',
-	width: '100px'
+  projectId: 'tarjim-project-id',
+  tarjimApikey: 'tarjim-api-key',
+  defaultLanguage: 'default-language',
+  defaultNamespace: 'default-namespace',
+  supportedLanguages: ['project-languages'],
+  additionalNamespaces: [],
+  cachedTarjimData: cachedTarjimData,
+  useSingleInstance: true,
+  keyCase: 'lower', // or 'original' | 'preserve'
 };
 
-<img {...__TM(key, attributes)} />
+export default tarjimConfig;
+```
+</details>
 
-renders <img src='src' className='img-class-name' width='100px' />
+<details>
+<summary><strong>TypeScript</strong></summary>
 
+```ts
+// tarjimConfig.ts
+import { TarjimClientConfig } from 'tarjim-react-client';
+import { cachedTarjimData } from './path-to-cached-tarjim-json-file';
+
+export const tarjimConfig: TarjimClientConfig = {
+  projectId: 'tarjim-project-id',
+  tarjimApikey: 'tarjim-api-key',
+  defaultLanguage: 'default-language',
+  defaultNamespace: 'default-namespace',
+  supportedLanguages: ['project-languages'],
+  additionalNamespaces: [],
+  cachedTarjimData,
+  useSingleInstance: true,
+  keyCase: 'lower',
+};
+```
+</details>
+
+---
+
+## Step 2: Initialize the client
+
+```js
+import TarjimClient from 'tarjim-react-client';
+
+const tarjimClient = new TarjimClient(tarjimConfig);
 ```
 
-**NOTE** Attributes defined in tarjim.io translation value will be overwritten by the attributes passed to __TM
-  
+You can listen for loading completion:
 
-### Using tarjim datasets
-To fetch all languages for a specific key in default namespace
-
-```javascript
-__TD($key, $config = {});
+```js
+tarjimClient.on('finishedLoadingTranslations', () => {
+  // Translations are ready
+});
 ```
 
-Sample return
+---
 
-```javascript
-{
-	'en' => 'en values,
-	'fr' => 'fr value'
-}
-```
+## 💡 TarjimClient Functions
 
-To fetch key translations for a specific namespace, you can pass ```{'namespace' => 'your-namespace-name'}``` in the config param or ```{'namespace' => 'allNamespaces'}``` to fetch all namespaces.
+| Function                        | Description                                |
+|--------------------------------|--------------------------------------------|
+| `__T('key')`                   | Returns a `<span>` with the translated value |
+| `__TS('key')`                  | Returns raw string value (no span)         |
+| `__TM('key', attributes)`      | Returns attributes for `<img />`           |
+| `__TSEO('key', { SEO })`      | Updates meta tags for SEO                  |
+| `__TI('key')`                 | Translate image source                     |
+| `__TD('key', config)`         | Get translation for all languages          |
+| `getCurrentLocale()`          | Returns active locale                      |
+| `setCurrentLocale('ar')`      | Sets active locale                         |
+| `getIsLoadingTranslations()`  | Returns loading state                      |
 
-Example response
+---
 
-```javascript
-{
-	'namespace 1' => {
-		'en' => 'en values,
-		'fr' => 'fr value'
-	},
+## 🔄 Example: Using with Context Provider
 
-	'namespace 2' => {
-		'en' => 'en value',
-		'fr' => 'fr value'
-	}
-}
-```
+<details>
+<summary><strong>JavaScript</strong></summary>
 
-### Using tarjim for SEO tags
-* For page title
-```javascript
-__TSEO(key, {SEO: 'page_title'})
-```
-sets document.title = key's value from tarjim
-
-* For open graph
-```javascript
-__TSEO(key, {SEO: 'open_graph'})
-```
-
-creates the elements and attaches them to document head
-```
-<meta property="og:title" content="title">
-<meta property="og:description" content="desc">
-<meta property="og:site_name" content="site name">
-<meta property="og:url" content="url">
-<meta property="og:image" content="image">
-```
-the content is the value provided in tarjim for key type 'Open Graph'
-
-* For twitter cards
-```javascript
-__TSEO(key, {SEO: 'open_graph'})
-```
-
-creates the elements and attaches them to document head
-```
-<meta property="twitter:card" content="card">
-<meta property="twitter:title" content="title">
-<meta property="twitter:description" content="desc">
-<meta property="twitter:site" content="site">
-<meta property="twitter:image" content="image">
-```
-the content is the value provided in tarjim for key type 'Twitter card'
-
-* For page meta description
-```javascript
-__TSEO(key, {SEO: 'page_description'})
-```
-sets the content of the meta element where name="description" if it exists, creates it otherwise
-```
-<meta name="description" content="description en">
-```
-
-  
-### Example Usage With Provider
-
-```javascript
-// Libraries
-import React ,{ useState, useEffect, createContext } from 'react';
+```js
+// context/LocalizationProvider.js
+import React, { useState, useEffect, createContext } from 'react';
 import { TarjimClient, tarjimFunctions } from 'tarjim-react-client';
-import tarjimConfig from 'tarjimConfig.js';
+import tarjimConfig from '../tarjimConfig';
 
 export const LocalizationContext = createContext({
   ...tarjimFunctions,
@@ -215,62 +114,144 @@ export const LocalizationContext = createContext({
   tarjimIsLoading: true,
 });
 
-export const LocalizationProvider = ({children}) => {
-  // State
-  const [ tarjimClient, setTarjimClient ]  = useState(new TarjimClient(tarjimConfig));
-  const [ locale, setLocale ] = useState('');
-  const [ isLoading, setIsLoading ] = useState(true);
+export const LocalizationProvider = ({ children }) => {
+  const [tarjimClient] = useState(new TarjimClient(tarjimConfig));
+  const [isLoading, setIsLoading] = useState(true);
 
-  let defaultLanguage = 'en';
+  useEffect(() => {
+    const language =
+      localStorage.getItem('tarjimClientLanguage') || 'en';
 
-  /**
-   * 
-   */
-    useEffect(() => {
+    tarjimClient.setCurrentLocale(language);
 
-    // Get language from cake
-      let language;
-      let languageElement = document.getElementById('language');
-      language = defaultLanguage;
-      if (languageElement) {
-        language = languageElement.getAttribute('data-language')
-      }
-      else {
-        language = defaultLanguage;
-      }
+    tarjimClient.on('finishedLoadingTranslations', () => {
+      setIsLoading(false);
+    });
+  }, []);
 
-      tarjimClient.setCurrentLocale(language);
+  const setCurrentLanguage = (_locale) => {
+    const result = tarjimClient.setCurrentLocale(_locale);
+    localStorage.setItem('tarjimClientLanguage', _locale);
+    return result;
+  };
 
-      tarjimClient.on('finishedLoadingTranslations', function() {
-        setIsLoading(false);
-      })
-
-    // Disable eslint warning for next line
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  /**
-   *
-   */
-  function setCurrentLanguage(_locale) {
-    let returnVal = tarjimClient.setCurrentLocale(_locale);
-    setLocale(_locale)
-    return returnVal;
-  }
-
-  /**
-   * Render
-   */
   return (
     <LocalizationContext.Provider
       value={{
-        ...(new TarjimClient(tarjimConfig)),
-        tarjimIsLoading: isLoading,
+        ...tarjimClient,
         setCurrentLanguage,
-      }}>
+        tarjimIsLoading: isLoading,
+      }}
+    >
       {children}
     </LocalizationContext.Provider>
   );
+};
+```
+</details>
+
+<details>
+<summary><strong>TypeScript</strong></summary>
+
+```tsx
+// context/LocalizationProvider.tsx
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  ReactNode,
+} from 'react';
+import { TarjimClient, TarjimClientConfig, tarjimFunctions } from 'tarjim-react-client';
+import { tarjimConfig } from '../tarjimConfig';
+
+interface LocalizationContextType {
+  tarjimIsLoading: boolean;
+  setCurrentLanguage: (_locale: string) => boolean;
+  __T: (key: string, config?: any) => any;
+  __TS: (key: string, config?: any) => string;
+  __TM: (key: string, attrs?: Record<string, string>) => string;
+  __TSEO: (key: string, config?: any) => any;
+  __TI: (key: string, attrs?: Record<string, string>) => string;
+  __TD: (key: string, config?: any) => any;
 }
 
+export const LocalizationContext = createContext<LocalizationContextType>({
+  ...tarjimFunctions,
+  setCurrentLanguage: () => false,
+  tarjimIsLoading: true,
+});
+
+interface Props {
+  children: ReactNode;
+}
+
+export const LocalizationProvider = ({ children }: Props) => {
+  const [tarjimClient] = useState(() => new TarjimClient(tarjimConfig));
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const language =
+      localStorage.getItem('tarjimClientLanguage') || 'en';
+
+    tarjimClient.setCurrentLocale(language);
+
+    tarjimClient.on('finishedLoadingTranslations', () => {
+      setIsLoading(false);
+    });
+  }, [tarjimClient]);
+
+  const setCurrentLanguage = (_locale: string): boolean => {
+    const result = tarjimClient.setCurrentLocale(_locale);
+    localStorage.setItem('tarjimClientLanguage', _locale);
+    return result;
+  };
+
+  return (
+    <LocalizationContext.Provider
+      value={{
+        __T: tarjimClient.__T,
+        __TS: tarjimClient.__TS,
+        __TM: tarjimClient.__TM,
+        __TSEO: tarjimClient.__TSEO,
+        __TI: tarjimClient.__TI,
+        __TD: tarjimClient.__TD,
+        setCurrentLanguage,
+        tarjimIsLoading: isLoading,
+      }}
+    >
+      {children}
+    </LocalizationContext.Provider>
+  );
+};
+```
+</details>
+
+---
+
+## Example: Using `__T` in components
+
+```tsx
+import { useContext } from 'react';
+import { LocalizationContext } from './context/LocalizationProvider';
+
+const MyComponent = () => {
+  const { __T, setCurrentLanguage } = useContext(LocalizationContext);
+
+  return (
+    <>
+      <h1>{__T('home.title')}</h1>
+      <button onClick={() => setCurrentLanguage('fr')}>Français</button>
+    </>
+  );
+};
+```
+
+---
+
+## ✅ Tip: How to generate `cachedTarjimData`
+
+Call this API and save `response.result.data`:
+
+```
+GET https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces?project_id=XXX&namespace[]=default
 ```
