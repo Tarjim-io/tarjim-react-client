@@ -3,7 +3,8 @@
     "version": "1.0.23",
     "description": "React client to use tarjim translation functions",
     "main": "dist/index.js",
-    "module": "dist/index.js",
+    "main": "dist/index.js",
+    "types": "src/index.d.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "rm -rf dist && NODE_ENV=production npx babel src --out-dir dist --copy-files"
@@ -18,12 +19,10 @@
         "localization"
     ],
     "author": "Tarjim",
-    "contributors": [
-        {
-            "name": "jprah",
-            "email": "jp.rahme1997@gmail.com"
-        }
-    ],
+    "contributors": [{
+        "name": "jprah",
+        "email": "jp.rahme1997@gmail.com"
+    }],
     "license": "ISC",
     "bugs": {
         "url": "https://github.com/Tarjim-io/tarjim-react-client/issues"

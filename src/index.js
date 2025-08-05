@@ -2,7 +2,8 @@ import DOMPurify from 'isomorphic-dompurify';
 import React from 'react';
 import memoize from 'lodash.memoize';
 import EventEmitter from 'eventemitter3';
-import { version } from '../package.json';
+import pkg from '../package.json';
+const version = pkg.version;
 
 
 
