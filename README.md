@@ -44,10 +44,9 @@ export default tarjimConfig;
 
 ```ts
 // tarjimConfig.ts
-import { TarjimClientConfig } from 'tarjim-react-client';
 import { cachedTarjimData } from './path-to-cached-tarjim-json-file';
 
-export const tarjimConfig: TarjimClientConfig = {
+export const tarjimConfig = {
   projectId: 'tarjim-project-id',
   tarjimApikey: 'tarjim-api-key',
   defaultLanguage: 'default-language',
@@ -244,14 +243,4 @@ const MyComponent = () => {
     </>
   );
 };
-```
-
----
-
-## ✅ Tip: How to generate `cachedTarjimData`
-
-Call this API and save `response.result.data`:
-
-```
-GET https://app.tarjim.io/api/v1/translationkeys/jsonByNameSpaces?project_id=XXX&namespace[]=default
 ```
